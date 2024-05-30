@@ -38,6 +38,29 @@ def runge_kutta_method(x0, y0, k, h, n):
         y_values.append(y_new)
     return x_values, y_values
 
+# Méthode de collocation de Gauss-Legendre d'ordre 4
+def gauss_legendre_collocation(x0, y0, k, h, n):
+    # Points de Gauss-Legendre et poids pour une méthode d'ordre 4 (trois points)
+    c1 = 0.5 - np.sqrt(3) / 6
+    c2 = 0.5
+    c3 = 0.5 + np.sqrt(3) / 6
+    b1 = b3 = 5 / 18
+    b2 = 4 / 9
+
+    x_values = [x0]
+    y_values = [y0]
+    for i in range(n):
+        x = x_values[-1]
+        y = y_values[-1]
+        # Résolution du système aux points de collocation
+        f1 = f(x + c1 * h, y + c1 * h * f(x, y, k), k)
+        f2 = f(x + c2 * h, y + c2 * h * f(x, y, k), k)
+        f3 = f(x + c3 * h, y + c3 * h * f(x, y, k), k)
+        y_new = y + h * (b1 * f1 + b2 * f2 + b3 * f3)
+        x_values.append(x + h)
+        y_values.append(y_new)
+    return x_values, y_values
+
 # Fonction pour calculer l'erreur
 def calculate_error(y_approx, y_real):
     return np.abs(np.array(y_approx) - np.array(y_real))
@@ -53,9 +76,10 @@ n = 100  # Nombre d'itérations
 fig_sol, ax_sol = plt.subplots(num='Solutions', figsize=(10, 5))
 fig_err, ax_err = plt.subplots(num='Erreurs', figsize=(10, 5))
 
-# Solutions des deux méthodes
+# Solutions des méthodes
 euler_x, euler_y = euler_method(x0, y0, k, h, n)
 rk_x, rk_y = runge_kutta_method(x0, y0, k, h, n)
+gl_x, gl_y = gauss_legendre_collocation(x0, y0, k, h, n)
 
 # Solution réelle
 x_values = np.linspace(x0, x0 + n * h, n + 1)
@@ -64,20 +88,23 @@ y_values = f_reel(x_values, y0, k)
 # Calcul des erreurs
 euler_error = calculate_error(euler_y, f_reel(np.array(euler_x), y0, k))
 rk_error = calculate_error(rk_y, f_reel(np.array(rk_x), y0, k))
+gl_error = calculate_error(gl_y, f_reel(np.array(gl_x), y0, k))
 
 # Tracé des solutions
 ax_sol.plot(euler_x, euler_y, label='Euler Method')
 ax_sol.plot(rk_x, rk_y, label='Runge-Kutta Method')
+ax_sol.plot(gl_x, gl_y, label='Gauss-Legendre Method')
 ax_sol.plot(x_values, y_values, label='Solution Analytique', linestyle='dashed')
 ax_sol.set_xlabel('x')
 ax_sol.set_ylabel('y')
-ax_sol.set_title('Solution de y\' + ky = 0')
+ax_sol.set_title("Solution de $y' + ky = 0$")
 ax_sol.legend()
 ax_sol.grid(True)
 
 # Tracé des erreurs
 ax_err.plot(euler_x, euler_error, label='Erreur Euler')
 ax_err.plot(rk_x, rk_error, label='Erreur Runge-Kutta')
+ax_err.plot(gl_x, gl_error, label='Erreur Gauss-Legendre')
 ax_err.set_xlabel('x')
 ax_err.set_ylabel('Erreur')
 ax_err.set_title('Erreur des méthodes numériques')
@@ -98,24 +125,28 @@ def update(val):
     y0 = y0_slider.val
     euler_x, euler_y = euler_method(x0, y0, k, h, n)
     rk_x, rk_y = runge_kutta_method(x0, y0, k, h, n)
+    gl_x, gl_y = gauss_legendre_collocation(x0, y0, k, h, n)
     y_values = f_reel(x_values, y0, k)
     
     euler_error = calculate_error(euler_y, f_reel(np.array(euler_x), y0, k))
     rk_error = calculate_error(rk_y, f_reel(np.array(rk_x), y0, k))
+    gl_error = calculate_error(gl_y, f_reel(np.array(gl_x), y0, k))
     
     ax_sol.clear()
     ax_sol.plot(euler_x, euler_y, label='Euler Method')
     ax_sol.plot(rk_x, rk_y, label='Runge-Kutta Method')
+    ax_sol.plot(gl_x, gl_y, label='Gauss-Legendre Method')
     ax_sol.plot(x_values, y_values, label='Solution Analytique', linestyle='dashed')
     ax_sol.set_xlabel('x')
     ax_sol.set_ylabel('y')
-    ax_sol.set_title('Solution de y\' + ky = 0')
+    ax_sol.set_title('Solution de $y\' + ky = 0$')
     ax_sol.legend()
     ax_sol.grid(True)
 
     ax_err.clear()
     ax_err.plot(euler_x, euler_error, label='Erreur Euler')
     ax_err.plot(rk_x, rk_error, label='Erreur Runge-Kutta')
+    ax_err.plot(gl_x, gl_error, label='Erreur Gauss-Legendre')
     ax_err.set_xlabel('x')
     ax_err.set_ylabel('Erreur')
     ax_err.set_title('Erreur des méthodes numériques')
