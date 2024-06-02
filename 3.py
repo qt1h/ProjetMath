@@ -40,12 +40,15 @@ def runge_kutta_method(x0, y0, k, h, n):
 
 # Méthode de collocation de Gauss-Legendre d'ordre 4
 def gauss_legendre_collocation(x0, y0, k, h, n):
-    # Points de Gauss-Legendre et poids pour une méthode d'ordre 4 (trois points)
+    # Coefficients du tableau de Butcher pour Gauss-Legendre d'ordre 4
     c1 = 0.5 - np.sqrt(3) / 6
-    c2 = 0.5
-    c3 = 0.5 + np.sqrt(3) / 6
-    b1 = b3 = 5 / 18
-    b2 = 4 / 9
+    c2 = 0.5 + np.sqrt(3) / 6
+    a11 = 0.25
+    a12 = 0.25 - np.sqrt(3) / 6
+    a21 = 0.25 + np.sqrt(3) / 6
+    a22 = 0.25
+    b1 = 0.5
+    b2 = 0.5
 
     x_values = [x0]
     y_values = [y0]
@@ -53,10 +56,9 @@ def gauss_legendre_collocation(x0, y0, k, h, n):
         x = x_values[-1]
         y = y_values[-1]
         # Résolution du système aux points de collocation
-        f1 = f(x + c1 * h, y + c1 * h * f(x, y, k), k)
-        f2 = f(x + c2 * h, y + c2 * h * f(x, y, k), k)
-        f3 = f(x + c3 * h, y + c3 * h * f(x, y, k), k)
-        y_new = y + h * (b1 * f1 + b2 * f2 + b3 * f3)
+        f1 = f(x + c1 * h, y + a11 * h * f(x, y, k) + a12 * h * f(x, y, k), k)
+        f2 = f(x + c2 * h, y + a21 * h * f(x, y, k) + a22 * h * f(x, y, k), k)
+        y_new = y + h * (b1 * f1 + b2 * f2)
         x_values.append(x + h)
         y_values.append(y_new)
     return x_values, y_values
@@ -156,11 +158,11 @@ def update(val):
     fig_sol.canvas.draw_idle()
     fig_err.canvas.draw_idle()
 
-# Enregistrer la fonction de mise à jour avec les sliders
+# Lier les sliders à la fonction de mise à jour 
 y0_slider.on_changed(update)
 k_slider.on_changed(update)
 
-# Ajouter un bouton pour réinitialiser les sliders
+# Bouton pour réinitialiser les sliders
 resetax = fig_sol.add_axes([0.8, 0.05, 0.1, 0.04])
 button = Button(resetax, 'Reset', hovercolor='0.975')
 
