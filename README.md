@@ -33,6 +33,5 @@ Ce projet explore différentes méthodes numériques pour approcher les solution
    python 4.py
    ```
 
-## Auteurs
+## Auteurs: SombraSwiftwind, qt1h
 Projet développé dans le cadre d'un cours ou d'une recherche sur les méthodes numériques.
-SombraSwiftwind, qt1h
